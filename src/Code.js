@@ -4,7 +4,7 @@
  */
 
 // GitHub で書き換えて push すると、GAS エディター側もこの値に変わります
-const DEPLOY_MESSAGE = 'Hello from GitHub Actions!';
+const DEPLOY_MESSAGE = 'Hello from GitHub Actions! (first deploy)';
 
 function hello() {
   Logger.log(DEPLOY_MESSAGE + ' (' + formatNow_() + ')');
