@@ -1,0 +1,62 @@
+name: Deploy to Google Apps Script
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - ".github/workflows/deploy-gas.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-gas
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install clasp
+        run: npm install -g @google/clasp@3
+
+      - name: Restore clasp credentials
+        env:
+          CLASPRC_JSON_BASE64: ${{ secrets.CLASPRC_JSON_BASE64 }}
+        run: |
+          if [ -z "$CLASPRC_JSON_BASE64" ]; then
+            echo "::error::Secret CLASPRC_JSON_BASE64 が設定されていません"
+            exit 1
+          fi
+          printf '%s' "$CLASPRC_JSON_BASE64" | base64 --decode > ~/.clasprc.json
+          if ! jq empty ~/.clasprc.json 2>/dev/null; then
+            echo "::error::CLASPRC_JSON_BASE64 をデコードした結果が正しい JSON ではありません"
+            exit 1
+          fi
+
+      - name: Create .clasp.json
+        env:
+          GAS_SCRIPT_ID: ${{ secrets.GAS_SCRIPT_ID }}
+        run: |
+          if [ -z "$GAS_SCRIPT_ID" ]; then
+            echo "::error::Secret GAS_SCRIPT_ID が設定されていません"
+            exit 1
+          fi
+          jq -n --arg id "$GAS_SCRIPT_ID" '{scriptId: $id, rootDir: "src"}' > .clasp.json
+
+      - name: Show files to push
+        run: clasp status
+
+      - name: Push to Apps Script
+        run: clasp push --force
