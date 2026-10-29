@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -40,7 +40,16 @@ jobs:
             echo "::error::Secret CLASPRC_JSON_BASE64 が設定されていません"
             exit 1
           fi
-          printf '%s' "$CLASPRC_JSON_BASE64" | base64 --decode > ~/.clasprc.json
+          # 貼り付け時に混ざった改行・スペースを取り除いてからデコードする
+          CLEANED=$(printf '%s' "$CLASPRC_JSON_BASE64" | tr -d '[:space:]')
+          if ! printf '%s' "$CLEANED" | base64 --decode > ~/.clasprc.json 2>/dev/null; then
+            if printf '%s' "$CLASPRC_JSON_BASE64" | jq empty 2>/dev/null; then
+              echo "::error::CLASPRC_JSON_BASE64 に Base64 変換前の JSON がそのまま入っています。Base64 に変換した文字列を登録し直してください"
+            else
+              echo "::error::CLASPRC_JSON_BASE64 が正しい Base64 ではありません。コピー漏れがないか確認して登録し直してください"
+            fi
+            exit 1
+          fi
           if ! jq empty ~/.clasprc.json 2>/dev/null; then
             echo "::error::CLASPRC_JSON_BASE64 をデコードした結果が正しい JSON ではありません"
             exit 1
