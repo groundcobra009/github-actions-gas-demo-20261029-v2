@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "src/**"
+      - ".clasp.json"
       - ".github/workflows/deploy-gas.yml"
   workflow_dispatch:
 
@@ -44,16 +45,6 @@ jobs:
             echo "::error::CLASPRC_JSON_BASE64 をデコードした結果が正しい JSON ではありません"
             exit 1
           fi
-
-      - name: Create .clasp.json
-        env:
-          GAS_SCRIPT_ID: ${{ secrets.GAS_SCRIPT_ID }}
-        run: |
-          if [ -z "$GAS_SCRIPT_ID" ]; then
-            echo "::error::Secret GAS_SCRIPT_ID が設定されていません"
-            exit 1
-          fi
-          jq -n --arg id "$GAS_SCRIPT_ID" '{scriptId: $id, rootDir: "src"}' > .clasp.json
 
       - name: Show files to push
         run: clasp status

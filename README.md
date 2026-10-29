@@ -5,6 +5,7 @@
 ## 構成
 
 ```
+.clasp.json         # 反映先のスクリプト ID と rootDir
 src/
   appsscript.json   # GAS のマニフェスト
   Code.js           # GAS のコード
@@ -17,11 +18,12 @@ src/
 | Name | 中身 |
 |---|---|
 | `CLASPRC_JSON_BASE64` | `clasp login` で作られた `~/.clasprc.json` を Base64 にしたもの |
-| `GAS_SCRIPT_ID` | 反映先の GAS プロジェクトのスクリプト ID |
+
+反映先のスクリプト ID は `.clasp.json` に書いてあります（スクリプト ID だけでは他人は編集できないので、シークレットにはしていません）。
 
 ## 動くタイミング
 
-- `main` ブランチの `src/` 以下が変更されて push されたとき
+- `main` ブランチの `src/` 以下か `.clasp.json` が変更されて push されたとき
 - Actions タブから「Deploy to Google Apps Script」を手動実行（Run workflow）したとき
 
 > ⚠️ `clasp push` は GAS 側のファイルを `src/` の内容で上書きします。GAS エディターにしかないファイルは消えるので注意してください。

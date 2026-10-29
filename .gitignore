@@ -1,8 +1,5 @@
 # clasp の認証情報（絶対にコミットしない）
 .clasprc.json
 
-# GitHub Actions 内で GAS_SCRIPT_ID から自動生成する
-.clasp.json
-
 node_modules/
 .DS_Store
